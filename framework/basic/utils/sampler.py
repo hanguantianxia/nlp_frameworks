@@ -123,6 +123,7 @@ class SequentialSampler(Sampler):
         self.drop_last = drop_last
     
     def init_dataset(self, dataset: Dataset):
+        
         self.dataset = dataset
         self.data_size = len(dataset)
         return self
@@ -179,7 +180,9 @@ class RamdomBatchSampler(Sampler):
 
 
 class BalanceSampler(Sampler):
-    
+    """
+    balance sample from by the selected field
+    """
     def __init__(self, balance_field, batch_size=1, balance_patition=None, drop_last=False, mode="data"):
         """
 

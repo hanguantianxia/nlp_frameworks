@@ -32,7 +32,9 @@ class BaseTokenizer():
     
     def __call__(self, input_string) -> List[str]:
         return self.tokenize(input_string)
-
+    
+    def count_len(self, input_string):
+        return len(self(input_string))
 
 class EnglishTokenizer(BaseTokenizer):
     

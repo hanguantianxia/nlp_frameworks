@@ -114,6 +114,14 @@ class Worker(BaseWorker):
                     process_result = self.vocab.tokenize(field.data, max_length=self.max_seq_len)
                 elif process_method == 'tensor':
                     process_result = torch.tensor(field.data)
+                elif process_method.lower() == "bert_stack":
+                    ori_data = field.data
+                    keys = ori_data[0].keys()
+                    process_result = {}
+                    for key in keys:
+                        filed_list = [item[key] for item in field.data]
+                        process_result[key] = torch.cat(filed_list, dim=0)
+                
                 else:
                     process_result = field.data
             elif callable(process_method):

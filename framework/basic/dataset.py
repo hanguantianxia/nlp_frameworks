@@ -215,7 +215,8 @@ class Dataset():
             return Dataset(target_data)
         
         elif isinstance(item, str):
-            item = item.lower()  # ignore  case
+            if self.key_uncased:
+                item = item.lower()
             return self._data_container[item]
         
         elif isinstance(item, Iterable):

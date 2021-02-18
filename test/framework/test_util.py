@@ -19,7 +19,7 @@ from framework.basic.tokenizer import EnglishTokenizer
 from framework.utils.io import *
 
 
-file_path = r"G:\Competition\2021_ali\test\framework\test_data\train-v1.1.jsonl"
+file_path = r"/test/test_data\train-v1.1.jsonl"
 
 def generate_sample_dataset(num_smaples=100):
     """
@@ -56,7 +56,7 @@ def generate_NLI_dataset(num_sample=100):
         else:
             return [3]
 
-    data = read_origin_data(r"test_data/snli_1.0_dev.jsonl", limit=num_sample)
+    data = read_origin_data(r"../test_data/snli_1.0_dev.jsonl", limit=num_sample)
     data = [Instance(item) for item in data]
     dataset = Dataset(data)
     dataset.apply(process_label, new_field_names=["label_id"])

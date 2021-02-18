@@ -127,8 +127,9 @@ def read_json(filename):
             result = method()
         except json.decoder.JSONDecodeError as e:
             print("read json method %s failed" % method.__name__)
-        except:
+        except Exception as e:
             print("read json method %s failed" % method.__name__)
+            raise e
         else:
             return result
 

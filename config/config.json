@@ -1,0 +1,11 @@
+{
+  "train_dataset": "./data/SNLI/snli_1.0_train.jsonl",
+  "dev_dataset": "./data/SNLI/snli_1.0_dev.jsonl",
+  "test_dataset": "./data/SNLI/snli_1.0_test.jsonl",
+  "pretrain_model": "./pretrain/bert-base-uncased",
+  "max_seq_len": 128,
+  "hidden_size": 768,
+  "label_size": 3,
+  "train_batch_size": 24,
+  "test_batch_size": 24
+}

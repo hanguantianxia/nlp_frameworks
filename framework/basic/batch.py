@@ -30,10 +30,10 @@ SINGLE_WORKER = 0
 
 
 class BatchGenerator():
-    process_method = ["bert", "vocab", "keep", "tensor"]
+    process_method = ["bert", "vocab", "keep", "tensor", "bert_stack"]
     
     def __init__(self, dataset: Dataset,
-                 vocab,
+                 vocab=None,
                  field_names=None,
                  process_methods: List[Union[str, None, Callable]] = None,
                  field2method: Dict = None,
@@ -61,7 +61,7 @@ class BatchGenerator():
         :param batch_size:
         :param num_workers:
         :param device:
-        :param collate_fn:
+        :param collate_fn: the function work on batch dataset
         :param max_seq_len:
         :param bert_tokenizer:
         :param batch_sampler:
@@ -81,8 +81,8 @@ class BatchGenerator():
         
         assert len(field_names) == len(process_methods), "process method must have the same length as field names"
         _check_process_method(process_methods)
-        
-        assert isinstance(vocab, Vocabulary), "Vocab must be the Vocabulary instance."
+        if vocab is not None:
+            assert isinstance(vocab, Vocabulary), "Vocab must be the Vocabulary instance."
         assert isinstance(dataset, Dataset), "dataset must be the Dataset instance."
         self.max_seq_len = max_seq_len
         self.padding = padding
