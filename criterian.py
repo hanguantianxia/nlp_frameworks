@@ -10,30 +10,48 @@
 @Desciption 
 
 '''
-
-from typing import Dict
+import torch
+from typing import Dict, Union,List
 
 import torch.nn as nn
 
 from framework.basic.batch import Batch
+from framework.basic.base_criterion import BaseCriterion
 
-
-class Criterian:
+class Criterion(BaseCriterion):
     
     def __init__(self):
+        super(Criterion, self).__init__()
         self.loss = nn.CrossEntropyLoss()
     
-    def compute_loss(self, model_output: Dict, batch: Batch):
+    def compute_loss(self, logit:Dict, data:Batch) ->Union[torch.Tensor, List[torch.Tensor], Dict[str, torch.Tensor]]:
         """
         
         :param model_output:
         :param batch:
         :return:
         """
-        label = batch['gold_label_index']
-        logit = model_output['logit']
+        label = data['gold_label_index']
+        logit = logit['logit']
         loss = self.loss(logit, label)
         return loss
     
-    def __call__(self, *args, **kwargs):
-        return self.compute_loss(*args, **kwargs)
+    def get_index(self, logit:Dict, data:Batch) ->Dict:
+        """
+        
+        :param logit:
+        :param data:
+        :return:
+        """
+        logit = logit['logit']
+        select_id = torch.argmax(logit,dim=-1) # [batch_size]
+        select_id_list = select_id.tolist()
+        
+        gold_label_index = data['gold_label_index']
+        gold_label_index_list = gold_label_index.tolist()
+        
+        index = {
+            "select_id_list":select_id_list,
+            "gold_label_index":gold_label_index_list
+        }
+        return index

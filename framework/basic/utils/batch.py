@@ -35,6 +35,7 @@ class Batch():
     def to(self, device: torch.device):
         for key, val in self._batch_data.items():
             self[key] = self._to(val, device)
+        return self
     
     def _to(self, obj, device: torch.device):
         if isinstance(obj, torch.Tensor):

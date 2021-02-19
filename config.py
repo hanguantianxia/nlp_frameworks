@@ -29,7 +29,19 @@ class Config(ConfigBase):
         
         self.train_batch_size = kwargs['train_batch_size']
         self.test_batch_size = kwargs['test_batch_size']
-
+        
+        self.train_times = kwargs['train_times']
+        self.epoch = kwargs['epoch']
+        
+        self.print_iter = kwargs['print_iter']
+        self.test_iter = kwargs['test_iter']
+        
+        self.model_path = kwargs['model_path']
+        self.model_name = kwargs['model_name']
+        
+        self.device = kwargs['device']
+        
+        
     
     def from_args(cls):
         pass

@@ -16,8 +16,9 @@ import torch
 from config import Config
 from typing import List, Tuple,Dict
 from framework.basic.batch import Batch
-from dataloader import prepare_dataloader
-class BertNLI(nn.Module):
+from dataloader import DataloaderFactory
+from framework.basic.base_model import BaseModel
+class BertNLI(BaseModel):
     
     def __init__(self, config:Config):
         super(BertNLI, self).__init__()
@@ -72,10 +73,11 @@ class BertNLI(nn.Module):
         return output_dict
     
 if __name__ == '__main__':
-    config = Config.from_json('./config/config.json')
-    dataloader = prepare_dataloader(config, for_test=True)
-    test_batch = next(iter(dataloader))
-    
+    config = Config.from_json("./config/config.json")
+    dataloader_factory = DataloaderFactory(config)
+    dataloader = dataloader_factory.prepare_dataloaders()[0]
+
+    batch = next(iter(dataloader))
     model = BertNLI(config)
-    result = model(test_batch)
+    result = model(batch)
     

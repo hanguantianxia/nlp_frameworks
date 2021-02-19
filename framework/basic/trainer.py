@@ -16,10 +16,12 @@ from typing import Dict
 
 import torch
 import torch.optim as optim
-
+from framework.basic.batch import BatchGenerator
 from framework.basic.git_tool import GitManager
 from framework.basic.tester import Tester
-
+from framework.basic.base_criterion import BaseCriterion
+from framework.basic.base_evaluator import BaseEvaluator
+from framework.basic.base_model import BaseModel
 class Trainer():
     """
     trainer 需要实现的功能有:
@@ -36,11 +38,10 @@ class Trainer():
     """
     
     def __init__(self,
-                 model,
-                 criterion,
-                 evaluator,
-                 train_loader,
-                 dev_loader,
+                 model:BaseModel,
+                 criterion:BaseCriterion,
+                 tester:Tester,
+                 train_loader:BatchGenerator,
                  optimizer: optim.Optimizer = None,
                  scheduler=None,
                  train_times=1,
@@ -53,10 +54,11 @@ class Trainer():
                  preprocess=None,
                  saved_dict: Dict = None,
                  accumulation_steps=1):
+
         self.model = model
         self.criterion = criterion
-        self.evaluator = evaluator
-        self.optimizer = optimizer
+        self.tester = tester
+        self.optimizer = optimizer if model is not None else torch.optim.AdamW(params=model.parameters())
         self.scheduler = scheduler
         
         self.EPOCH = epoch
@@ -65,35 +67,39 @@ class Trainer():
         self.TRAIN_TIMES = train_times
         self.accumulation_steps = accumulation_steps
         
+        self.model_name = model_name
         self.model_path = model_path
-        self.best_model_path = os.path.join(self.model_path,
-                                            model_name + "_" + type(self.model).__name__ + 'best_model')
-        self.checkpoint_path = os.path.join(self.model_path,
-                                            model_name + "_" + type(self.model).__name__ + 'checkpoint')
-        
+        self.save_path = os.path.join(model_path, model_name)
+        self.__prepare_path()
+
         self.device = torch.device(device)
         self.preprocess = preprocess if preprocess is not None else lambda x: x
         
         self.train_loader = train_loader
-        self.dev_loader = dev_loader
         
         self.model.to(self.device)
         self.criterion.to(self.device)
-        self.logger = self.__init_logger(model_path, model_name)
+        self.logger = self.__init_logger()
 
-        
         self.git_manager = GitManager.get_repo(".")
         self.saved_dict = saved_dict
         
-    def __init_logger(self,model_path,model_name):
-        logger_file_path = os.path.join(model_path, "train_log.log")
+        
+    def __prepare_path(self):
+        try:
+            os.makedirs(self.save_path)
+        except Exception:
+            pass
+        
+    def __init_logger(self):
+        logger_file_path = os.path.join(self.save_path, self.model_name + "_train_log.log")
         file_handler = logging.FileHandler(filename=logger_file_path)
         stream_handler = logging.StreamHandler()
         formatter = logging.Formatter('[%(asctime)s - %(name)s %(levelname)s] %(message)s')
         file_handler.setFormatter(formatter)
         stream_handler.setFormatter(formatter)
     
-        logger = logging.getLogger(model_name)
+        logger = logging.getLogger(self.model_name)
         logger.addHandler(file_handler)
         logger.addHandler(stream_handler)
         logger.setLevel(logging.INFO)
@@ -111,10 +117,8 @@ class Trainer():
                 for step, data in enumerate(self.train_loader):
                     total_step += 1
                     data = data.to(self.device)
-                    label = label.to(self.device)
-                    
-                    
                     data = self.preprocess(data)
+                    
                     logit = self.model(data)
                     loss,index = self.criterion(logit, data)
                     loss = loss / self.accumulation_steps
@@ -129,7 +133,7 @@ class Trainer():
                         self.logger.info(msg)
                     
                     if total_step % self.TEST_ITER == 0:
-                        index, metrics = self.evaluator(self.model)
+                        index, metrics = self.tester.eval(self.model)
                         if index < best_indicator:
                             msg = "Epoch:[{}epoch/{}] Step:{},Index is better at{}".format(epoch + 1, self.EPOCH,
                                                                                            total_step,
@@ -138,18 +142,17 @@ class Trainer():
                             
                             best_indicator = index
                             
-                            self.save_model(metrics)
+                            save_dict = self.save_model(metrics)
+                            torch.save(save_dict, self.save_path + "_traintime_%d_saved_model.pt"%train_time)
                         else:
                             msg = "Epoch:[{}/{}] Step:{},Index is not better at{}".format(epoch + 1, self.EPOCH,
                                                                                           total_step,
                                                                                           index)
                             self.logger.info(msg)
                         
-                        self.save_checkpoint(self.checkpoint_path)
-    
-    def evalueate(self, data_loader, best_model=True):
-        return self.evaluator(data_loader, self.model, self.criterion, self.device)
-    
+                        save_dict = self.save_checkpoint(metrics)
+                        torch.save(save_dict, self.save_path + "_traintime_%d_checkpoint.pt" % train_time)
+
     def save_model(self, metrics):
         save_dict = {
             "state_dict": self.model.state_dict(),
@@ -160,7 +163,11 @@ class Trainer():
         if self.saved_dict is not None:
             save_dict.update(self.saved_dict)
         
-        torch.save(save_dict, self.best_model_path + ".pkl")
+        return save_dict
+    
+    @property
+    def model(self):
+        return self.model
     
     def save_checkpoint(self, metrics):
         save_dict = {
@@ -172,7 +179,7 @@ class Trainer():
         if self.saved_dict is not None:
             save_dict.update(self.saved_dict)
         
-        torch.save(save_dict, self.best_model_path + "cur_checkpoint.pkl")
+        return save_dict
     
     @property
     def config(self):

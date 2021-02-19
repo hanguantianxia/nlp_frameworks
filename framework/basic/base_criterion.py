@@ -12,14 +12,14 @@
 '''
 import torch
 from abc import abstractmethod
-from typing import Dict,Optional, List, Tuple
+from typing import Dict, Union, List, Tuple
 from framework.basic.batch import Batch
 from framework.basic.base_model import BaseModel
 class BaseCriterion(BaseModel):
     
     
     @abstractmethod
-    def compute_loss(self, logit:Dict, data:Batch)->Optional[torch.Tensor, List[torch.Tensor], Dict[str, torch.Tensor]]:
+    def compute_loss(self, logit:Dict, data:Batch)->Union[torch.Tensor, List[torch.Tensor], Dict[str, torch.Tensor]]:
         """
         the abstract method to compute the loss function
         
@@ -29,7 +29,7 @@ class BaseCriterion(BaseModel):
         """
     
     @abstractmethod
-    def compute_index(self, logit:Dict, data:Batch)->Dict:
+    def get_index(self, logit:Dict, data:Batch)->Dict:
         """
         the abstract method to compute the metrics index
         :param logit:
@@ -37,7 +37,7 @@ class BaseCriterion(BaseModel):
         :return:
         """
     
-    def forward(self,logit:Dict, data:Batch) -> Tuple[Optional[torch.Tensor, List[torch.Tensor], Dict[str, torch.Tensor]],Dict]:
+    def forward(self,logit:Dict, data:Batch) -> Tuple[Union[torch.Tensor, List[torch.Tensor], Dict[str, torch.Tensor]],Dict]:
         loss = self.compute_loss(logit, data)
-        index = self.compute_index(logit, data)
+        index = self.get_index(logit, data)
         return loss, index

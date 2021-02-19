@@ -79,8 +79,8 @@ class FieldProcessor:
         
         
 
-def prepare_dataset(config:Config, for_test=False):
-    ori_dataset = read_json(config.train_dataset)
+def prepare_dataset(dataset, config:Config, for_test=False):
+    ori_dataset = read_json(dataset)
     dataset = Dataset(ori_dataset)
     if for_test:
         dataset = dataset[:100]
@@ -95,7 +95,7 @@ def prepare_dataset(config:Config, for_test=False):
 
 if __name__ == '__main__':
     config = Config.from_json("./config/config.json")
-    dataset= prepare_dataset(config, for_test=True)
+    dataset= prepare_dataset(config.train_dataset, config, for_test=True)
     
     
     

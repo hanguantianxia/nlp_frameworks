@@ -12,6 +12,7 @@
 '''
 from tqdm import tqdm
 import torch
+from framework.basic.base_model import BaseModel
 from framework.basic.base_evaluator import BaseEvaluator
 from framework.basic.base_criterion import BaseCriterion
 from framework.basic.batch import BatchGenerator
@@ -22,7 +23,6 @@ class Tester:
                  criterion:BaseCriterion,
                  evaluator:BaseEvaluator,
                  preprocess=None,
-                 model=None,
                  show_process=False
                  ):
         """
@@ -31,7 +31,6 @@ class Tester:
         :param criterion: compute the loss function
         :param model:
         """
-        self.model = model
         self.dataloader = dataloader
         self.criterion = criterion
         self.show_process = show_process
@@ -45,10 +44,7 @@ class Tester:
         self.model = new_model
         
         
-    def main(self, model=None):
-        if model is not None:
-            self.model = model
-        
+    def eval(self, model:BaseModel):
         iterator = enumerate(self.dataloader)
         if self.show_process:
             iterator = tqdm(iterator)
@@ -56,7 +52,7 @@ class Tester:
         with torch.no_grad():
             for step, data in iterator:
                 data = self.preprocess(data)
-                logit = self.model(data)
+                logit = model(data)
                 loss, index = self.criterion(logit, data)
                 self.evaluator.append(index)
         
@@ -67,5 +63,5 @@ class Tester:
     
     
     def __call__(self, *args, **kwargs):
-        return self.main(*args, **kwargs)
+        return self.eval(*args, **kwargs)
     

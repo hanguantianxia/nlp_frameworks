@@ -7,5 +7,12 @@
   "hidden_size": 768,
   "label_size": 3,
   "train_batch_size": 24,
-  "test_batch_size": 24
+  "test_batch_size": 24,
+  "train_times": 1,
+  "epoch": 5,
+  "print_iter": 20,
+  "test_iter": 200,
+  "model_path": "./model",
+  "model_name": "TestModel",
+  "device": "cpu"
 }
