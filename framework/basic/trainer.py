@@ -165,9 +165,6 @@ class Trainer():
         
         return save_dict
     
-    @property
-    def model(self):
-        return self.model
     
     def save_checkpoint(self, metrics):
         save_dict = {

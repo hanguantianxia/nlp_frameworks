@@ -28,7 +28,7 @@ if __name__ == '__main__':
     
     
     dataloaders_factory = DataloaderFactory(config)
-    train_loader, dev_loader, test_loader = dataloaders_factory.prepare_dataloaders()
+    train_loader, train_seq_loader, dev_loader, test_loader = dataloaders_factory.prepare_dataloaders()
     
     
     tester = Tester(dev_loader, criterion, evaluator, show_process=True)

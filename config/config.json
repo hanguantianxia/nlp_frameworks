@@ -14,5 +14,5 @@
   "test_iter": 200,
   "model_path": "./model",
   "model_name": "TestModel",
-  "device": "cpu"
+  "device": "cuda:0"
 }

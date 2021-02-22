@@ -266,8 +266,12 @@ class Dataset():
                 iterator = tqdm(enumerate(self), total=len(self), desc=func_name, ncols=100, mininterval=0.3)
             else:
                 iterator = enumerate(self)
+            # TODO: Multi processor to deal with big data
             for idx, item in iterator:
                 result.append(func(item))
+                
+            
+            
             if new_field_names is not None:
                 assert len(new_field_names) == len(result[0]) or len(
                     new_field_names) == 1, "the length of new field names must equal to the length ofoutput"
