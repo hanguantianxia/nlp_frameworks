@@ -86,6 +86,7 @@ def prepare_dataset(dataset, config:Config, for_test=False):
         dataset = dataset[:100]
     field_processor = FieldProcessor(config)
     dataset.apply(field_processor.preprocess_fields,
+                  workers=8,
                   new_field_names=['bert_input', 'gold_label_index', "span"],
                   show_process=True)
     
