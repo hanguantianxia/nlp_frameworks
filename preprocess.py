@@ -10,34 +10,35 @@
 @Desciption 
 
 '''
-from framework.basic.dataset import Dataset
-from framework.utils.io import *
-from transformers import AutoTokenizer
-from config import Config
 from typing import List, Tuple
 
+from transformers import AutoTokenizer
+
+from config import Config
+from framework.basic.dataset import Dataset
+from framework.utils.io import *
+
 fields2methods = {
-    "captionID":"keep",
+    "captionID": "keep",
     "gold_label": "keep",
     "pairID": "keep"
 }
 
-
 goldlabel2int = {
-    "neutral":0,
-    "entailment":1,
-    "contradiction":2,
-    "-":-1
+    "neutral": 0,
+    "entailment": 1,
+    "contradiction": 2,
+    "-": -1
 }
+
 
 class FieldProcessor:
     
-    def __init__(self, config:Config):
+    def __init__(self, config: Config):
         self.config = config
         self.bert_tokenizer = AutoTokenizer.from_pretrained(config.pretrain_model)
     
-    
-    def search_span(self, bert_input)->List[Tuple[int, int]]:
+    def search_span(self, bert_input) -> List[Tuple[int, int]]:
         """
         search the span of two sentence by sepical token
         [cls] sentence1 [sep] sentence2 [sep]
@@ -53,10 +54,6 @@ class FieldProcessor:
                 span_list.append((start, pos_idx))
                 start = pos_idx + 1
         return span_list
-        
-        
-    
-    
     
     def preprocess_fields(self, item):
         gold_label = item["gold_label"]
@@ -76,10 +73,9 @@ class FieldProcessor:
         span = self.search_span(bert_input)
         
         return bert_input, gold_label_index, span
-        
-        
 
-def prepare_dataset(dataset, config:Config, for_test=False):
+
+def prepare_dataset(dataset, config: Config, for_test=False):
     ori_dataset = read_json(dataset)
     dataset = Dataset(ori_dataset)
     if for_test:
@@ -96,8 +92,4 @@ def prepare_dataset(dataset, config:Config, for_test=False):
 
 if __name__ == '__main__':
     config = Config.from_json("./config/config.json")
-    dataset= prepare_dataset(config.train_dataset, config, for_test=True)
-    
-    
-    
-
+    dataset = prepare_dataset(config.train_dataset, config, for_test=True)

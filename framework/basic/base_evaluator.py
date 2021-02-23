@@ -10,12 +10,14 @@
 @Desciption 
 
 '''
-from typing import Tuple,Dict
 from abc import abstractmethod
+from typing import Tuple, Dict
+
+
 class BaseEvaluator:
     
     @abstractmethod
-    def append(self, metrics:Dict):
+    def append(self, metrics: Dict):
         """
         
         :param metrics: the metrics dict computed by the criterion instance
@@ -23,12 +25,10 @@ class BaseEvaluator:
         """
     
     @abstractmethod
-    def reduce(self)->Tuple[float, Dict]:
+    def reduce(self) -> Tuple[float, Dict]:
         """
         
         :return:
         index: the final index to measure the model
         metrics: the metrics of model
         """
-    
-        

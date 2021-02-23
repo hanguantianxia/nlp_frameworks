@@ -10,26 +10,29 @@
 @Desciption 
 
 '''
-from transformers import AutoModel
-import torch.nn as nn
+from typing import List, Tuple, Dict
+
 import torch
+import torch.nn as nn
+from transformers import AutoModel
+
 from config import Config
-from typing import List, Tuple,Dict
-from framework.basic.batch import Batch
 from dataloader import DataloaderFactory
 from framework.basic.base_model import BaseModel
+from framework.basic.batch import Batch
+
+
 class BertNLI(BaseModel):
     
-    def __init__(self, config:Config):
+    def __init__(self, config: Config):
         super(BertNLI, self).__init__()
         self.config = config
         self.bert_model = AutoModel.from_pretrained(config.pretrain_model)
         
-        self.mlp1 = nn.Linear(config.hidden_size*2, config.hidden_size)
+        self.mlp1 = nn.Linear(config.hidden_size * 2, config.hidden_size)
         self.mlp2 = nn.Linear(config.hidden_size, config.label_size)
-        
-        
-    def span_pooling(self, bert_output:torch.Tensor, spans:List[Tuple[int,int]])->torch.Tensor:
+    
+    def span_pooling(self, bert_output: torch.Tensor, spans: List[Tuple[int, int]]) -> torch.Tensor:
         """
         
         :param bert_output:
@@ -40,16 +43,16 @@ class BertNLI(BaseModel):
         for batch_id, span in enumerate(spans):
             pool_list = []
             for start, end in span:
-                pool_vec = bert_output[batch_id, start:end].mean(dim=0) # [hidden_size]
+                pool_vec = bert_output[batch_id, start:end].mean(dim=0)  # [hidden_size]
                 pool_list.append(pool_vec)
-                
-            pool_vec = torch.cat(pool_list, dim=-1)# [hidden_size * 2]
+            
+            pool_vec = torch.cat(pool_list, dim=-1)  # [hidden_size * 2]
             bert_pool_list.append(pool_vec)
         
         bert_pool_vec = torch.stack(bert_pool_list, dim=0)
         return bert_pool_vec
-        
-    def forward(self, batch:Batch)->Dict:
+    
+    def forward(self, batch: Batch) -> Dict:
         """
         
         :param batch:
@@ -57,7 +60,7 @@ class BertNLI(BaseModel):
         """
         bert_input = batch['bert_input']
         span = batch['span']
-
+        
         bert_output = self.bert_model(**bert_input)[0]
         pool_output = self.span_pooling(bert_output, span)
         
@@ -65,19 +68,19 @@ class BertNLI(BaseModel):
         logit = self.mlp2(logit)
         
         output_dict = {
-            "bert_output":bert_output,
+            "bert_output": bert_output,
             "bert_pool_output": pool_output,
-            "logit":logit
+            "logit": logit
         }
         
         return output_dict
-    
+
+
 if __name__ == '__main__':
     config = Config.from_json("./config/config.json")
     dataloader_factory = DataloaderFactory(config)
     dataloader = dataloader_factory.prepare_dataloaders()[0]
-
+    
     batch = next(iter(dataloader))
     model = BertNLI(config)
     result = model(batch)
-    

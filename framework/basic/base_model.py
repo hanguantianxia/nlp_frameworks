@@ -10,23 +10,23 @@
 @Desciption 
 
 '''
-import torch
-import torch.nn as nn
 from abc import abstractmethod
 from typing import Dict
+
+import torch.nn as nn
+
+
 class BaseModel(nn.Module):
     
     def __init__(self):
         super(BaseModel, self).__init__()
     
-    
     @property
     def device(self):
         return next(iter(self.parameters()))
     
-    
     @abstractmethod
-    def forward(self,*args, **kwargs) -> Dict:
+    def forward(self, *args, **kwargs) -> Dict:
         """
         
         :param args:

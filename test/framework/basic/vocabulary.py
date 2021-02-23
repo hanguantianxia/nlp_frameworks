@@ -12,14 +12,13 @@
 '''
 
 import unittest
-import torch
-import torch.nn as nn
-from framework.basic.vocablary import *
+
 from framework.basic.tokenizer import EnglishTokenizer
+from framework.basic.vocablary import *
 
 
 class TestVocab(unittest.TestCase):
-
+    
     def setUp(self) -> None:
         self.tokenizer = EnglishTokenizer()
         self.ori_test_sample1 = ["I like noodles",
@@ -27,17 +26,17 @@ class TestVocab(unittest.TestCase):
                                  "Who like the pycharm of jet brain."]
         self.test_sample1 = [self.tokenizer.tokenize(item)
                              for item in self.ori_test_sample1]
-
+        
         self.ori_test_sample2 = ["I like noodles"]
         self.test_sample2 = [self.tokenizer.tokenize(item)
                              for item in self.ori_test_sample2]
-
+        
         vocab_file = "../../pretrain/bert-base-uncased/vocab.txt"
         self.vocab = Vocabulary.from_vocab_file(vocab_file)
-
+    
     def testTokenize(self):
         res = self.vocab.tokenize(self.test_sample1, padding=True)
-
+        
         self.assertIsInstance(res, torch.Tensor)
         self.assertEqual(res.dtype, torch.int64)
         self.assertEqual(res.size(), (3, 8))

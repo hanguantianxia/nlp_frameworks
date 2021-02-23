@@ -10,21 +10,20 @@
 @Desciption 
 
 '''
-import os
 from config import Config
-from preprocess import prepare_dataset
-from framework.basic.dataset import Dataset
 from framework.basic.batch import BatchGenerator
 from framework.basic.utils.sampler import *
 from framework.utils.io import read_pkl
+from preprocess import prepare_dataset
+
 
 class DataloaderFactory():
     
-    def __init__(self, config: Config, for_test:bool=False):
+    def __init__(self, config: Config, for_test: bool = False):
         self.config = config
-        self.train_dataset:Union[Dataset,None] = None
-        self.dev_dataset:Union[Dataset, None] = None
-        self.test_dataset:Union[Dataset,None] = None
+        self.train_dataset: Union[Dataset, None] = None
+        self.dev_dataset: Union[Dataset, None] = None
+        self.test_dataset: Union[Dataset, None] = None
         self.for_test = for_test
     
     def prepare_dataloader(self,
@@ -62,14 +61,14 @@ class DataloaderFactory():
             dataset = prepare_dataset(dataset_file, self.config, for_test=self.for_test)
             dataset.save(dataset_file + ".pkl")
             return dataset
-            
+        
         def read_pkl_dataset(dataset_file):
             """
             
             :return:
             """
             return read_pkl(dataset_file)
-            
+        
         if dataset_file.find(".pkl") != -1:
             dataset = read_pkl_dataset(dataset_file)
         else:
@@ -80,7 +79,7 @@ class DataloaderFactory():
         self.train_dataset = self.prepare_dataset(self.config.train_dataset)
         self.dev_dataset = self.prepare_dataset(self.config.dev_dataset)
         self.test_dataset = self.prepare_dataset(self.config.test_dataset)
-
+    
     def prepare_dataloaders(self):
         """
 
@@ -94,14 +93,14 @@ class DataloaderFactory():
         
         train_seq_sampler = SequentialSampler(self.config.test_batch_size)
         train_seq_loader = self.prepare_dataloader(self.train_dataset, sampler=train_seq_sampler)
-
+        
         dev_sampler = SequentialSampler(self.config.test_batch_size)
         dev_loader = self.prepare_dataloader(self.dev_dataset, sampler=dev_sampler)
-
+        
         test_sampler = SequentialSampler(self.config.test_batch_size)
         test_loader = self.prepare_dataloader(self.test_dataset, sampler=test_sampler)
-
-        return train_loader, train_seq_loader, dev_loader,test_loader
+        
+        return train_loader, train_seq_loader, dev_loader, test_loader
 
 
 if __name__ == '__main__':

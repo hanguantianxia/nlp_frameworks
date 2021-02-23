@@ -12,14 +12,15 @@
 '''
 __all__ = ['Instance', 'Dataset']
 
-import torch
 import copy
 import pickle
 from collections import UserDict, Iterable, Callable, defaultdict
-from typing import List, Union, Dict
 from multiprocessing import Pool
+from typing import List, Union, Dict
+
+import torch
 from tqdm import tqdm
-from concurrent.futures import ProcessPoolExecutor
+
 from framework.basic.field import Field
 from framework.basic.tokenizer import EnglishTokenizer
 from framework.basic.utils.inner_utils import pretty_table_printer
@@ -262,22 +263,21 @@ class Dataset():
         :param func:  a callable object with interface func(ins,)
         :return:
         """
+        
         def stop_cache():
             import sys
             import torch
             from torch.utils.data import dataloader
-            from torch.multiprocessing import reductions
             from multiprocessing.reduction import ForkingPickler
-
+            
             default_collate_func = dataloader.default_collate
-
-
+            
             def default_collate_override(batch):
                 dataloader._use_shared_memory = False
                 return default_collate_func(batch)
-
+            
             setattr(dataloader, 'default_collate', default_collate_override)
-
+            
             for t in torch._storage_classes:
                 if sys.version_info[0] == 2:
                     if t in ForkingPickler.dispatch:
@@ -285,8 +285,6 @@ class Dataset():
                 else:
                     if t in ForkingPickler._extra_reducers:
                         del ForkingPickler._extra_reducers[t]
-
-
         
         if len(self) == 0:
             return []
@@ -304,7 +302,6 @@ class Dataset():
                     result.append(func(item))
             else:
                 
-
                 result = []
                 stop_cache()
                 # pool = ProcessPoolExecutor(max_workers=workers)

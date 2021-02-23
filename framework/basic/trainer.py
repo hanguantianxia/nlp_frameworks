@@ -16,12 +16,14 @@ from typing import Dict
 
 import torch
 import torch.optim as optim
+
+from framework.basic.base_criterion import BaseCriterion
+from framework.basic.base_model import BaseModel
 from framework.basic.batch import BatchGenerator
 from framework.basic.git_tool import GitManager
 from framework.basic.tester import Tester
-from framework.basic.base_criterion import BaseCriterion
-from framework.basic.base_evaluator import BaseEvaluator
-from framework.basic.base_model import BaseModel
+
+
 class Trainer():
     """
     trainer 需要实现的功能有:
@@ -38,10 +40,10 @@ class Trainer():
     """
     
     def __init__(self,
-                 model:BaseModel,
-                 criterion:BaseCriterion,
-                 tester:Tester,
-                 train_loader:BatchGenerator,
+                 model: BaseModel,
+                 criterion: BaseCriterion,
+                 tester: Tester,
+                 train_loader: BatchGenerator,
                  optimizer: optim.Optimizer = None,
                  scheduler=None,
                  train_times=1,
@@ -54,7 +56,7 @@ class Trainer():
                  preprocess=None,
                  saved_dict: Dict = None,
                  accumulation_steps=1):
-
+        
         self.model = model
         self.criterion = criterion
         self.tester = tester
@@ -71,7 +73,7 @@ class Trainer():
         self.model_path = model_path
         self.save_path = os.path.join(model_path, model_name)
         self.__prepare_path()
-
+        
         self.device = torch.device(device)
         self.preprocess = preprocess if preprocess is not None else lambda x: x
         
@@ -80,17 +82,16 @@ class Trainer():
         self.model.to(self.device)
         self.criterion.to(self.device)
         self.logger = self.__init_logger()
-
+        
         self.git_manager = GitManager.get_repo(".")
         self.saved_dict = saved_dict
-        
-        
+    
     def __prepare_path(self):
         try:
             os.makedirs(self.save_path)
         except Exception:
             pass
-        
+    
     def __init_logger(self):
         logger_file_path = os.path.join(self.save_path, self.model_name + "_train_log.log")
         file_handler = logging.FileHandler(filename=logger_file_path)
@@ -98,15 +99,14 @@ class Trainer():
         formatter = logging.Formatter('[%(asctime)s - %(name)s %(levelname)s] %(message)s')
         file_handler.setFormatter(formatter)
         stream_handler.setFormatter(formatter)
-    
+        
         logger = logging.getLogger(self.model_name)
         logger.addHandler(file_handler)
         logger.addHandler(stream_handler)
         logger.setLevel(logging.INFO)
-
+        
         return logger
-        
-        
+    
     def fit(self):
         total_step = 0
         best_indicator = float('inf')
@@ -120,14 +120,14 @@ class Trainer():
                     data = self.preprocess(data)
                     
                     logit = self.model(data)
-                    loss,index = self.criterion(logit, data)
+                    loss, index = self.criterion(logit, data)
                     loss = loss / self.accumulation_steps
                     loss.backward()  # 计算反向回传的梯度
                     
-                    if ((step + 1)%self.accumulation_steps) == 0:
+                    if ((step + 1) % self.accumulation_steps) == 0:
                         self.optimizer.step()  # 更新参数，用Adam的方法
                         self.optimizer.zero_grad()  # 清零上一个batch的梯度
-
+                    
                     if total_step % self.PRINT_ITER == 0:
                         msg = "Epoch:[{}/{}] Step:{},Loss {}".format(epoch + 1, self.EPOCH, total_step, loss)
                         self.logger.info(msg)
@@ -143,7 +143,7 @@ class Trainer():
                             best_indicator = index
                             
                             save_dict = self.save_model(metrics)
-                            torch.save(save_dict, self.save_path + "_traintime_%d_saved_model.pt"%train_time)
+                            torch.save(save_dict, self.save_path + "_traintime_%d_saved_model.pt" % train_time)
                         else:
                             msg = "Epoch:[{}/{}] Step:{},Index is not better at{}".format(epoch + 1, self.EPOCH,
                                                                                           total_step,
@@ -152,7 +152,7 @@ class Trainer():
                         
                         save_dict = self.save_checkpoint(metrics)
                         torch.save(save_dict, self.save_path + "_traintime_%d_checkpoint.pt" % train_time)
-
+    
     def save_model(self, metrics):
         save_dict = {
             "state_dict": self.model.state_dict(),
@@ -164,7 +164,6 @@ class Trainer():
             save_dict.update(self.saved_dict)
         
         return save_dict
-    
     
     def save_checkpoint(self, metrics):
         save_dict = {
@@ -193,6 +192,3 @@ class Trainer():
         config.pop("preprocess")
         
         return config
-        
-        
-        

@@ -11,15 +11,13 @@
 
 '''
 
-import unittest
-
-from framework.basic.dataset import Dataset, Field
+from framework.basic.dataset import Dataset
 from framework.basic.dataset import Instance
 from framework.basic.tokenizer import EnglishTokenizer
 from framework.utils.io import *
 
-
 file_path = r"/test/test_data\train-v1.1.jsonl"
+
 
 def generate_sample_dataset(num_smaples=100):
     """
@@ -30,7 +28,7 @@ def generate_sample_dataset(num_smaples=100):
     data = read_origin_data(file_path, limit=num_smaples)
     data = [Instance(item) for item in data]
     dataset = Dataset(data)
-
+    
     return dataset
 
 
@@ -55,11 +53,10 @@ def generate_NLI_dataset(num_sample=100):
             return [2]
         else:
             return [3]
-
+    
     data = read_origin_data(r"../test_data/snli_1.0_dev.jsonl", limit=num_sample)
     data = [Instance(item) for item in data]
     dataset = Dataset(data)
     dataset.apply(process_label, new_field_names=["label_id"])
-
+    
     return dataset
-

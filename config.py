@@ -20,7 +20,7 @@ class Config(ConfigBase):
         self.train_dataset: str = kwargs['train_dataset']
         self.dev_dataset: str = kwargs['dev_dataset']
         self.test_dataset: str = kwargs['test_dataset']
-
+        
         self.pretrain_model: str = kwargs['pretrain_model']
         self.max_seq_len = kwargs['max_seq_len']
         
@@ -40,8 +40,6 @@ class Config(ConfigBase):
         self.model_name = kwargs['model_name']
         
         self.device = kwargs['device']
-        
-        
     
     def from_args(cls):
         pass

@@ -11,13 +11,15 @@
 
 '''
 import torch
+
 from config import Config
-from framework.basic.trainer import Trainer
-from framework.basic.tester import Tester
-from model import BertNLI
-from dataloader import DataloaderFactory
 from criterian import Criterion
+from dataloader import DataloaderFactory
 from evaluator import Evaluator
+from framework.basic.tester import Tester
+from framework.basic.trainer import Trainer
+from model import BertNLI
+
 if __name__ == '__main__':
     config = Config.from_json("./config/config.json")
     
@@ -26,13 +28,10 @@ if __name__ == '__main__':
     criterion = Criterion()
     evaluator = Evaluator()
     
-    
     dataloaders_factory = DataloaderFactory(config)
     train_loader, train_seq_loader, dev_loader, test_loader = dataloaders_factory.prepare_dataloaders()
     
-    
     tester = Tester(dev_loader, criterion, evaluator, show_process=True)
-    
     
     trainer = Trainer(
         model,
@@ -49,4 +48,3 @@ if __name__ == '__main__':
     )
     
     trainer.fit()
-

@@ -10,18 +10,21 @@
 @Desciption 
 
 '''
-from tqdm import tqdm
 import torch
-from framework.basic.base_model import BaseModel
-from framework.basic.base_evaluator import BaseEvaluator
+from tqdm import tqdm
+
 from framework.basic.base_criterion import BaseCriterion
+from framework.basic.base_evaluator import BaseEvaluator
+from framework.basic.base_model import BaseModel
 from framework.basic.batch import BatchGenerator
+
+
 class Tester:
     
     def __init__(self,
-                 dataloader:BatchGenerator,
-                 criterion:BaseCriterion,
-                 evaluator:BaseEvaluator,
+                 dataloader: BatchGenerator,
+                 criterion: BaseCriterion,
+                 evaluator: BaseEvaluator,
                  preprocess=None,
                  show_process=False
                  ):
@@ -36,15 +39,14 @@ class Tester:
         self.show_process = show_process
         self.preprocess = preprocess if preprocess is not None else lambda x: x
         self.evaluator = evaluator
-        
+    
     def set_dataloader(self, new_dataloader):
         self.dataloader = new_dataloader
     
     def set_model(self, new_model):
         self.model = new_model
-        
-        
-    def eval(self, model:BaseModel):
+    
+    def eval(self, model: BaseModel):
         iterator = enumerate(self.dataloader)
         if self.show_process:
             iterator = tqdm(iterator)
@@ -60,8 +62,5 @@ class Tester:
         
         return total_index, metrics
     
-    
-    
     def __call__(self, *args, **kwargs):
         return self.eval(*args, **kwargs)
-    

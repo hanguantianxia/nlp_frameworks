@@ -1,9 +1,8 @@
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 from torch.utils.data import Dataset, DataLoader
-import os
 from torch.utils.data.distributed import DistributedSampler
+
 # 1) 初始化
 torch.distributed.init_process_group(backend="nccl")
 
@@ -17,33 +16,37 @@ local_rank = torch.distributed.get_rank()
 torch.cuda.set_device(local_rank)
 device = torch.device("cuda", local_rank)
 
+
 class RandomDataset(Dataset):
     def __init__(self, size, length):
         self.len = length
         self.data = torch.randn(length, size).to('cuda')
-
+    
     def __getitem__(self, index):
         return self.data[index]
-
+    
     def __len__(self):
         return self.len
+
 
 dataset = RandomDataset(input_size, data_size)
 # 3）使用DistributedSampler
 rand_loader = DataLoader(dataset=dataset,
                          batch_size=batch_size,
-                         sampler=DistributedSampler(dataset)) #关键行, 使用特殊的sampler
+                         sampler=DistributedSampler(dataset))  # 关键行, 使用特殊的sampler
+
 
 class Model(nn.Module):
     def __init__(self, input_size, output_size):
         super(Model, self).__init__()
         self.fc = nn.Linear(input_size, output_size)
-
+    
     def forward(self, input):
         output = self.fc(input)
         print("  In Model: input size", input.size(),
               "output size", output.size())
         return output
+
 
 model = Model(input_size, output_size)
 
@@ -62,6 +65,6 @@ for data in rand_loader:
         input_var = data
     else:
         input_var = data
-
+    
     output = model(input_var)
     print("Outside: input size", input_var.size(), "output_size", output.size())

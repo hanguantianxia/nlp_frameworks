@@ -13,6 +13,7 @@
 import numpy as np
 from sklearn.metrics import f1_score, recall_score, precision_score, confusion_matrix, accuracy_score
 
+
 def compute_FPRC(y_true, y_pred):
     assert len(y_true) == len(y_pred)
     if len(y_true) != 0:
@@ -50,4 +51,3 @@ def macro_accuracy(y_true, y_pred):
     conf_mat_norm = conf_mat.astype('float') / conf_mat.sum(axis=1)[:, np.newaxis]
     macro_accuracy = np.mean([conf_mat_norm[i][i] for i in range(conf_mat_norm.shape[0])])
     return macro_accuracy
-

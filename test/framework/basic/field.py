@@ -22,30 +22,30 @@ class TestCase(unittest.TestCase):
         dataset = generate_tokned_dataset()
         select_ids = [0]
         c = dataset[[0]]
-
+        
         for field_name, field in c.items():
             self.assertEqual(len(field), 1)
-
+    
     def test_Default_Padder_inplace(self):
         dataset = generate_tokned_dataset()
         padder = DefaultPadder()
         src_field = dataset['token_context']
         max_len = max([len(item) for item in src_field])
-
+        
         padded_field = padder(src_field, in_place=True)
         self.assertEqual(padded_field, src_field)
-
+        
         for item in padded_field:
             self.assertEqual(len(item), max_len)
-
+    
     def test_Default_Padder(self):
         dataset = generate_tokned_dataset()
         padder = DefaultPadder()
         src_field = dataset['token_context']
         max_len = max([len(item) for item in src_field])
-
+        
         padded_field = padder(src_field, in_place=False)
         self.assertNotEqual(padded_field, src_field)
-
+        
         for item in padded_field:
             self.assertEqual(len(item), max_len)

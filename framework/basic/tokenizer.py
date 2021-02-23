@@ -36,6 +36,7 @@ class BaseTokenizer():
     def count_len(self, input_string):
         return len(self(input_string))
 
+
 class EnglishTokenizer(BaseTokenizer):
     
     def tokenize(self, input_string: str, lower_case=True) -> List[str]:
