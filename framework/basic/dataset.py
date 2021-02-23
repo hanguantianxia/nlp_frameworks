@@ -262,6 +262,31 @@ class Dataset():
         :param func:  a callable object with interface func(ins,)
         :return:
         """
+        def stop_cache():
+            import sys
+            import torch
+            from torch.utils.data import dataloader
+            from torch.multiprocessing import reductions
+            from multiprocessing.reduction import ForkingPickler
+
+            default_collate_func = dataloader.default_collate
+
+
+            def default_collate_override(batch):
+                dataloader._use_shared_memory = False
+                return default_collate_func(batch)
+
+            setattr(dataloader, 'default_collate', default_collate_override)
+
+            for t in torch._storage_classes:
+                if sys.version_info[0] == 2:
+                    if t in ForkingPickler.dispatch:
+                        del ForkingPickler.dispatch[t]
+                else:
+                    if t in ForkingPickler._extra_reducers:
+                        del ForkingPickler._extra_reducers[t]
+
+
         
         if len(self) == 0:
             return []
@@ -278,12 +303,15 @@ class Dataset():
                 for idx, item in iterator:
                     result.append(func(item))
             else:
+                
+
                 result = []
-                pool = ProcessPoolExecutor(max_workers=workers)
-                for x in pool.map(func, iterator,chunksize=1):
-                    result.append(x)
-                # with Pool(workers) as p:
-                #     result = p.map(func, iterator)
+                stop_cache()
+                # pool = ProcessPoolExecutor(max_workers=workers)
+                # for x in pool.map(func, iterator,chunksize=1):
+                #     result.append(x)
+                with Pool(workers) as p:
+                    result = p.map(func, iterator)
             #
             
             if new_field_names is not None:

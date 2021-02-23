@@ -1,15 +1,3 @@
-#!/usr/bin/env python
-# -*- encoding: utf-8 -*-
-'''
-@Author          hjt
-@File            test_multi_gpus.py
-@Contact         hanguantianxia@sina.com
-@License         (C)Copyright 2017-2018, Liugroup-NLPR-CASIA
-@Modify Time     2021/2/19 17:04    
-@Version         1.0 
-@Desciption 
-
-'''
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
