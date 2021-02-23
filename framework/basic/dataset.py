@@ -12,13 +12,14 @@
 '''
 __all__ = ['Instance', 'Dataset']
 
+import torch
 import copy
 import pickle
 from collections import UserDict, Iterable, Callable, defaultdict
 from typing import List, Union, Dict
-
+from multiprocessing import Pool
 from tqdm import tqdm
-
+from concurrent.futures import ProcessPoolExecutor
 from framework.basic.field import Field
 from framework.basic.tokenizer import EnglishTokenizer
 from framework.basic.utils.inner_utils import pretty_table_printer
@@ -251,26 +252,39 @@ class Dataset():
         for sample_id in range(len(self)):
             yield self[sample_id]
     
-    def apply(self, func, new_field_names: Union[List[str], None] = None, show_process=False):
+    def apply(self,
+              func,
+              new_field_names: Union[List[str], None] = None,
+              workers: int = 0,
+              show_process=False):
         """
 
         :param func:  a callable object with interface func(ins,)
         :return:
         """
+        
         if len(self) == 0:
             return []
         try:
-            result = []
             if show_process:
                 func_name = func.__name__ if type(func).__name__ == 'function' else type(func).__name__
-                iterator = tqdm(enumerate(self), total=len(self), desc=func_name, ncols=100, mininterval=0.3)
+                iterator = tqdm(self, total=len(self), desc=func_name, ncols=100, mininterval=0.3)
             else:
-                iterator = enumerate(self)
+                iterator = self
             # TODO: Multi processor to deal with big data
-            for idx, item in iterator:
-                result.append(func(item))
-                
             
+            if workers <= 1:
+                result = []
+                for idx, item in iterator:
+                    result.append(func(item))
+            else:
+                result = []
+                pool = ProcessPoolExecutor(max_workers=workers)
+                for x in pool.map(func, iterator,chunksize=1):
+                    result.append(x)
+                # with Pool(workers) as p:
+                #     result = p.map(func, iterator)
+            #
             
             if new_field_names is not None:
                 assert len(new_field_names) == len(result[0]) or len(
@@ -443,8 +457,11 @@ class Dataset():
         :param save_path:
         :return:
         """
-        with open(save_path, 'wb') as f:
-            pickle.dump(self, f)
+        try:
+            with open(save_path, 'wb') as f:
+                pickle.dump(self, f)
+        except Exception as e:
+            torch.save(self, save_path)
     
     @staticmethod
     def from_SQL():
