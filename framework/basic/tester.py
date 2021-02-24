@@ -26,7 +26,8 @@ class Tester:
                  criterion: BaseCriterion,
                  evaluator: BaseEvaluator,
                  preprocess=None,
-                 show_process=False
+                 show_process=False,
+                 device='cpu'
                  ):
         """
         
@@ -39,6 +40,7 @@ class Tester:
         self.show_process = show_process
         self.preprocess = preprocess if preprocess is not None else lambda x: x
         self.evaluator = evaluator
+        self.device = device
     
     def set_dataloader(self, new_dataloader):
         self.dataloader = new_dataloader
@@ -47,13 +49,18 @@ class Tester:
         self.model = new_model
     
     def eval(self, model: BaseModel):
-        iterator = enumerate(self.dataloader)
         if self.show_process:
-            iterator = tqdm(iterator)
+            iterator = tqdm(self.dataloader)
+        else:
+            iterator = self.dataloader
+        iterator = enumerate(iterator)
+        
+        model.to(self.device)
         
         with torch.no_grad():
             for step, data in iterator:
                 data = self.preprocess(data)
+                data = data.to(self.device)
                 logit = model(data)
                 loss, index = self.criterion(logit, data)
                 self.evaluator.append(index)

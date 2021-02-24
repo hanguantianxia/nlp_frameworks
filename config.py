@@ -40,6 +40,9 @@ class Config(ConfigBase):
         self.model_name = kwargs['model_name']
         
         self.device = kwargs['device']
+        
+        # super-params
+        self.lr = kwargs['lr']
     
     def from_args(cls):
         pass

@@ -10,7 +10,7 @@
 @Desciption 
 
 '''
-from typing import List, Tuple
+from typing import Tuple
 
 from transformers import AutoTokenizer
 

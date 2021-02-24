@@ -24,7 +24,7 @@ class Evaluator(BaseEvaluator):
         self.result_dict = defaultdict(list)
     
     def append(self, metrics: Dict):
-        for key, value in metrics:
+        for key, value in metrics.items():
             self.result_dict[key].extend(value)
     
     def reduce(self) -> Tuple[float, Dict]:

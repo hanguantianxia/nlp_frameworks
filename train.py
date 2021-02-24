@@ -24,7 +24,8 @@ if __name__ == '__main__':
     config = Config.from_json("./config/config.json")
     
     model = BertNLI(config)
-    optimizer = torch.optim.AdamW(params=model.parameters())
+    optimizer = torch.optim.AdamW(params=model.parameters(),
+                                  lr=config.lr)
     criterion = Criterion()
     evaluator = Evaluator()
     
@@ -32,6 +33,7 @@ if __name__ == '__main__':
     train_loader, train_seq_loader, dev_loader, test_loader = dataloaders_factory.prepare_dataloaders()
     
     tester = Tester(dev_loader, criterion, evaluator, show_process=True)
+    tester.eval(model)
     
     trainer = Trainer(
         model,

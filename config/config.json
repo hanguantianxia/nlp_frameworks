@@ -1,7 +1,7 @@
 {
-  "train_dataset": "./data/SNLI/snli_1.0_train.jsonl",
-  "dev_dataset": "./data/SNLI/snli_1.0_dev.jsonl",
-  "test_dataset": "./data/SNLI/snli_1.0_test.jsonl",
+  "train_dataset": "./data/SNLI/snli_1.0_dev.jsonl.pkl",
+  "dev_dataset": "./data/SNLI/snli_1.0_dev.jsonl.pkl",
+  "test_dataset": "./data/SNLI/snli_1.0_test.jsonl.pkl",
   "pretrain_model": "./pretrain/bert-base-uncased",
   "max_seq_len": 128,
   "hidden_size": 768,
@@ -14,5 +14,6 @@
   "test_iter": 200,
   "model_path": "./model",
   "model_name": "TestModel",
-  "device": "cuda:0"
+  "device": "cpu",
+  "lr": 1e-5
 }

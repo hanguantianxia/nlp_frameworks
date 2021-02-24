@@ -134,10 +134,11 @@ class Trainer():
                     
                     if total_step % self.TEST_ITER == 0:
                         index, metrics = self.tester.eval(self.model)
-                        if index < best_indicator:
-                            msg = "Epoch:[{}epoch/{}] Step:{},Index is better at{}".format(epoch + 1, self.EPOCH,
-                                                                                           total_step,
-                                                                                           index)
+                        if index > best_indicator:
+                            msg = "Epoch:[%d/%d] Step %d,Index %.4f is better than %.4f" % (epoch + 1, self.EPOCH,
+                                                                                            total_step,
+                                                                                            index,
+                                                                                            best_indicator)
                             self.logger.info(msg)
                             
                             best_indicator = index
